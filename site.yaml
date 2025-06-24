@@ -1,0 +1,7 @@
+---
+- name: Install and Configure HashiCorp Vault
+  hosts: all
+  become: true
+  roles:
+    - hashicorp_vault
+

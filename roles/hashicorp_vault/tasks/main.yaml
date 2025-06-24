@@ -1,0 +1,74 @@
+---
+- name: Verify 'vault_mode' variable is set correctly
+  fail:
+    msg: "'vault_mode' must be set to 'single' or 'cluster'."
+  when: vault_mode not in ['single', 'cluster']
+
+- name: Validate number of nodes for cluster mode
+  fail:
+    msg: "For 'vault_mode: cluster', you must define exactly 3 or 5 hosts in the 'vault-hosts' group."
+  when:
+    - vault_mode == "cluster"
+    - (groups['vault-hosts'] | length) not in [3, 5]
+
+- name: Install prerequisites
+  yum:
+    name:
+      - unzip
+      - curl
+    state: latest
+
+- name: Add the HashiCorp repo
+  yum_repository:
+    name: hashicorp
+    description: "HashiCorp Stable - $basearch"
+    baseurl: "https://rpm.releases.hashicorp.com/RHEL/9/$basearch/stable"
+    gpgkey: "https://rpm.releases.hashicorp.com/gpg"
+    enabled: yes
+    gpgcheck: yes
+
+- name: Install Vault
+  yum:
+    name: vault
+    state: latest
+
+- name: Create Vault configuration directory
+  file:
+    path: /etc/vault.d
+    state: directory
+    mode: "0755"
+
+- name: Configure Vault
+  template:
+    src: vault.hcl.j2
+    dest: /etc/vault.d/vault.hcl
+    owner: vault
+    group: vault
+    mode: "0644"
+
+- name: Set up Vault storage directory
+  file:
+    path: /var/lib/vault/data
+    state: directory
+    owner: vault
+    group: vault
+    mode: "0755"
+
+- name: Start and Enable Vault service
+  systemd:
+    name: vault
+    enabled: true
+    state: started
+
+- name: Open Vault ports in firewall
+  firewalld:
+    port: "{{ item }}"
+    permanent: true
+    state: enabled
+  with_items:
+    - 8200/tcp  # Main Vault port
+    - 8201/tcp  # Clustering port
+  notify:
+    - "restart vault"
+    - "reload firewalld"
+
