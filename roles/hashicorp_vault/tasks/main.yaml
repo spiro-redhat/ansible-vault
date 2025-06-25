@@ -60,6 +60,19 @@
     enabled: true
     state: started
 
+
+- name: Ensure firewalld is installed
+ ansible.builtin.yum:
+   name: firewalld
+   state: present
+ when: ansible_os_family == "RedHat"
+
+- name: Ensure firewalld is started and enabled
+ ansible.builtin.service:
+   name: firewalld
+   state: started
+   enabled: true
+
 - name: Open Vault ports in firewall
   ansible.posix.firewalld:
     port: "{{ item }}"
