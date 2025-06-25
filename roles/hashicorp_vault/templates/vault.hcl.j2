@@ -8,7 +8,7 @@ listener "tcp" {
 # Vault Storage Backend Configuration
 storage "raft" {
   path    = "/var/lib/vault/data"
-  node_id = "{{ inventory_hostname }}" :q!on
+  node_id = "{{ inventory_hostname }}"
 
   {%- if vault_mode == "cluster" %}
   # Raft cluster settings
