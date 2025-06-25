@@ -1,0 +1,4 @@
+[vault-hosts]
+vault1 ansible_host=192.168.10.10
+vault2 ansible_host=192.168.10.11
+vault3 ansible_host=192.168.10.12
