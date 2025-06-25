@@ -12,14 +12,14 @@
     - (groups['vault-hosts'] | length) not in [3, 5]
 
 - name: Install prerequisites
-  yum:
+  ansible.builtin.yum:
     name:
       - unzip
       - curl
     state: latest
 
 - name: Add the HashiCorp repo
-  yum_repository:
+  ansible.builtin.yum_repository:
     name: hashicorp
     description: "HashiCorp Stable - $basearch"
     baseurl: "https://rpm.releases.hashicorp.com/RHEL/9/$basearch/stable"
@@ -28,18 +28,18 @@
     gpgcheck: yes
 
 - name: Install Vault
-  yum:
+  ansible.builtin.yum:
     name: vault
     state: latest
 
 - name: Create Vault configuration directory
-  file:
+  ansible.builtin.file:
     path: /etc/vault.d
     state: directory
     mode: "0755"
 
 - name: Configure Vault
-  template:
+  ansible.builtin.template:
     src: vault.hcl.j2
     dest: /etc/vault.d/vault.hcl
     owner: vault
@@ -47,7 +47,7 @@
     mode: "0644"
 
 - name: Set up Vault storage directory
-  file:
+  ansible.builtin.file:
     path: /var/lib/vault/data
     state: directory
     owner: vault
@@ -55,13 +55,13 @@
     mode: "0755"
 
 - name: Start and Enable Vault service
-  systemd:
+  ansible.builtin.systemd:
     name: vault
     enabled: true
     state: started
 
 - name: Open Vault ports in firewall
-  firewalld:
+  ansible.posix.firewalld:
     port: "{{ item }}"
     permanent: true
     state: enabled
