@@ -1,3 +1,2 @@
 vault_mode: "single"  # Set "single" for standalone or "cluster" for raft-based clustering
-vault_version: "1.19.5"  # Example Vault version
 
