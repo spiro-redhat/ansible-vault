@@ -8,7 +8,7 @@ listener "tcp" {
 # Vault Storage Backend Configuration
 storage "raft" {
   path    = "/var/lib/vault/data"
-  node_id = "{{ inventory_hostname }}" # Jinja2 substitution
+  node_id = "{{ inventory_hostname }}" :q!on
 
   {%- if vault_mode == "cluster" %}
   # Raft cluster settings
@@ -33,4 +33,5 @@ cluster_addr = "http://{{ ansible_host }}:8201"
 {%- else %}
 # Single Mode API Address (uses the first entry in the vault-hosts group)
 api_addr = "http://{{ groups['vault-hosts'][0] }}:8200"
+cluster_addr = "http://127.0.0.1:8201"
 {%- endif %}
