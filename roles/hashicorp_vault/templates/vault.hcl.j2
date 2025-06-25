@@ -8,30 +8,29 @@ listener "tcp" {
 # Vault Storage Backend Configuration
 storage "raft" {
   path    = "/var/lib/vault/data"
-  node_id = "{{ inventory_hostname }}"
+  node_id = "{{ inventory_hostname }}" # Jinja2 substitution
 
-  {{- if vault_mode == "cluster" }}
+  {%- if vault_mode == "cluster" %}
   # Raft cluster settings
   # Dynamically set retry_join for all hosts in the vault-hosts group
-  {% for host in groups['vault-hosts'] %}
+  {%- for host in groups['vault-hosts'] %}
   retry_join {
     leader_api_addr = "http://{{ host }}:8200"
   }
-  {% endfor %}
-  {{- end }}
+  {%- endfor %}
+  {%- endif %}
 }
 
 # Vault UI Configuration
 ui = true
 disable_mlock = true
 
-{{- if vault_mode == "cluster" }}
+{%- if vault_mode == "cluster" %}
 # Cluster Mode API and Cluster Configuration
 api_addr = "http://{{ ansible_host }}:8200"
 cluster_addr = "http://{{ ansible_host }}:8201"
 
-{{ else }}
-# Single Mode API Address uses the first entry in the vault-hosts group
+{%- else %}
+# Single Mode API Address (uses the first entry in the vault-hosts group)
 api_addr = "http://{{ groups['vault-hosts'][0] }}:8200"
-{{ end }}
-
+{%- endif %}
